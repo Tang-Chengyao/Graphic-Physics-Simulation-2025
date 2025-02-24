@@ -4,6 +4,7 @@ set_xmakever("2.6.9")
 set_languages("cxx20")
 
 add_rules("mode.debug", "mode.release", "mode.profile")
+add_cxxflags("/utf-8")
 
 add_requires("fcl")
 add_requires("glad")

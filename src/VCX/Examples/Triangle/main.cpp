@@ -7,7 +7,7 @@
 #include <stb_image.h>
 
 #include "Assets/bundled.h"
-#include "Engine/App.h"
+#include "Engine/app.h"
 #include "Engine/prelude.hpp"
 #include "Engine/GL/Program.h"
 #include "Engine/GL/RenderItem.h"
