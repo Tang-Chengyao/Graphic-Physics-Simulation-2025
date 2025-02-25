@@ -18,6 +18,10 @@ add_requires("tinyobjloader")
 add_requires("yaml-cpp")
 add_requires("eigen")
 
+if is_plat("macosx") then
+    add_defines("PLATFORM_MACOSX")
+end
+
 target("assets")
     set_kind("phony")
     set_default(true)

@@ -67,7 +67,9 @@ namespace VCX::Engine::Internal {
 
     void RunApp_Init(AppContextOptions const & options) {
         RunApp_InitGLFW(options);
-        RunApp_InitGLFWWindowIcons(options);
+        #ifndef PLATFORM_MACOSX
+            RunApp_InitGLFWWindowIcons(options);
+        #endif
         RunApp_InitGLAD();
         RunApp_InitImGui(options);
     }
