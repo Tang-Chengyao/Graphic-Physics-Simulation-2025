@@ -6,7 +6,7 @@ layout(location = 0) out vec3 v_Position;
 
 uniform mat4  u_Projection;
 uniform mat4  u_View;
-uniform vec3  u_Color;
+uniform vec4  u_Color;
 
 void main() {
     v_Position  = a_Position;
