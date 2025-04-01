@@ -10,19 +10,6 @@ namespace VCX::Labs::RigidBody {
             Engine::GL::UniqueProgram({ Engine::GL::SharedShader("assets/shaders/flat.vert"), Engine::GL::SharedShader("assets/shaders/flat.frag") })),
         box1(1, 1.0f, glm::vec3(1.0f, 2.0f, 3.0f), glm::vec3(-5.0f, 0.0f, 0.0f)),
         box2(2, 1.0f, glm::vec3(1.0f, 2.0f, 3.0f), glm::vec3(5.0f, 0.0f, 0.0f)) {
-        //     3-----2
-        //    /|    /|
-        //   0 --- 1 |
-        //   | 7 - | 6
-        //   |/    |/
-        //   4 --- 5
-        const std::vector<std::uint32_t> line_index = { 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7 }; // line index
-        // const std::vector<std::uint32_t> tri_index = { 0, 1, 2, 0, 2, 3, 1, 4, 0, 1, 4, 5, 1, 6, 5, 1, 2, 6, 2, 3, 7, 2, 6, 7, 0, 3, 7, 0, 4, 7, 4, 5, 6, 4, 6, 7 };
-        const std::vector<std::uint32_t> tri_index = { 0, 1, 2, 0, 2, 3, 1, 0, 4, 1, 4, 5, 1, 5, 6, 1, 6, 2, 2, 7, 3, 2, 6, 7, 0, 3, 7, 0, 7, 4, 4, 6, 5, 4, 7, 6 };
-        box1.LineItem.UpdateElementBuffer(line_index);
-        box1.TriangleItem.UpdateElementBuffer(tri_index);
-        box2.LineItem.UpdateElementBuffer(line_index);
-        box2.TriangleItem.UpdateElementBuffer(tri_index);
         _cameraManager.AutoRotate = false;
         _cameraManager.Save(_camera);
     }
