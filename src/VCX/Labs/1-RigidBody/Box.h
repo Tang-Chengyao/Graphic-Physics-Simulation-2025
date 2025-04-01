@@ -16,11 +16,17 @@ namespace VCX::Labs::RigidBody {
         glm::quat                           q;
         glm::vec3                           v;
         glm::vec3                           w;
+        glm::mat3                           I_world;
         std::vector<glm::vec3>              VerticesPosition;
         Engine::GL::UniqueIndexedRenderItem TriangleItem;
         Engine::GL::UniqueIndexedRenderItem LineItem;
 
-        Box(int id, float mass, glm::vec3 dim, glm::vec3 position, glm::vec4 color = glm::vec4(0.0f, 0.5f, 0.5f, 0.8f), glm::quat q = glm::quat(1.0f, 0.0f, 0.0f, 0.0f)):
+        Box(const Box &)             = delete;
+        Box & operator=(const Box &) = delete;
+        Box(Box &&)                  = default;
+        Box & operator=(Box &&)      = default;
+
+        Box(int id, float mass, glm::vec3 dim, glm::vec3 position, glm::vec3 v = glm::vec3(0.0f), glm::vec3 w = glm::vec3(0.0f), glm::vec4 color = glm::vec4(0.0f, 0.5f, 0.5f, 0.8f), glm::quat q = glm::quat(1.0f, 0.0f, 0.0f, 0.0f)):
             id(id),
             color(color),
             mass(mass),
@@ -28,11 +34,13 @@ namespace VCX::Labs::RigidBody {
             I(1.0f / 12.0f * mass * glm::mat3(dim.y * dim.y + dim.z * dim.z, 0.0f, 0.0f, 0.0f, dim.x * dim.x + dim.z * dim.z, 0.0f, 0.0f, 0.0f, dim.x * dim.x + dim.y * dim.y)),
             position(position),
             q(glm::normalize(q)),
-            v(glm::vec3(0.0f)),
-            w(glm::vec3(0.0f)),
+            v(v),
+            w(w),
             VerticesPosition({ glm::vec3(-dim.x, dim.y, dim.z) / 2.0f, glm::vec3(dim.x, dim.y, dim.z) / 2.0f, glm::vec3(dim.x, dim.y, -dim.z) / 2.0f, glm::vec3(-dim.x, dim.y, -dim.z) / 2.0f, glm::vec3(-dim.x, -dim.y, dim.z) / 2.0f, glm::vec3(dim.x, -dim.y, dim.z) / 2.0f, glm::vec3(dim.x, -dim.y, -dim.z) / 2.0f, glm::vec3(-dim.x, -dim.y, -dim.z) / 2.0f }),
             TriangleItem(Engine::GL::VertexLayout().Add<glm::vec3>("position", Engine::GL::DrawFrequency::Stream, 0), Engine::GL::PrimitiveType::Triangles),
             LineItem(Engine::GL::VertexLayout().Add<glm::vec3>("position", Engine::GL::DrawFrequency::Stream, 0), Engine::GL::PrimitiveType::Lines) {
+            glm::mat3 R = glm::mat3_cast(q);
+            I_world     = R * I * glm::transpose(R);
             //     3-----2
             //    /|    /|
             //   0 --- 1 |

@@ -15,22 +15,23 @@ namespace VCX::Labs::RigidBody {
     public:
         CaseMultipleBox();
 
-        virtual std::string_view const GetName() override { return "Two Boxes Collision"; }
+        virtual std::string_view const GetName() override { return "Multiple Boxes"; }
 
         virtual void                     OnSetupPropsUI() override;
         virtual Common::CaseRenderResult OnRender(std::pair<std::uint32_t, std::uint32_t> const desiredSize) override;
         virtual void                     OnProcessInput(ImVec2 const & pos) override;
 
-        void OnProcessMouseControl(glm::vec3 mouseDelta);
-        void UpdatePhysics(float dt);
-        void HandleCollisionBoxBox(Box & box1, Box & box2);
-        void HandleCollisionWallBox(const Wall & wall, Box & box);
+        void      OnProcessMouseControl(glm::vec3 mouseDelta);
+        void      UpdatePhysics(float dt);
+        void      HandleCollisionBoxBox(Box & box1, Box & box2);
+        void      HandleCollisionWallBox(const Wall & wall, Box & box);
+        glm::vec3 MapColor(float E, float Emax = 50.0f);
 
     private:
         Engine::GL::UniqueProgram     _program;
         Engine::GL::UniqueRenderFrame _frame;
         Engine::Camera                _camera {
-                           .Eye    = glm::vec3(-15.0f, 0.0f, 15.0f),
+                           .Eye    = glm::vec3(-25.0f, 0.0f, 25.0f),
                            .Target = glm::vec3 { 0.0f, 0.0f, 0.0f },
                            .Up     = glm::vec3 { 0.0f, 0.0f, 1.0f },
                            .ZFar   = 1000.0f
@@ -38,12 +39,11 @@ namespace VCX::Labs::RigidBody {
         Common::OrbitCameraManager _cameraManager;
         std::vector<Wall>          _walls;
         std::vector<Box>           _boxes;
-        int                        _numBoxes { 50 };
+        int                        _numBoxes { 100 };
         float                      _gravity { 9.8f };
-        float                      _muN { 0.8f };
+        float                      _muN { 0.99f };
         float                      _muT { 0.2f };
-        float                      _c { 0.8f };
-        float                      _energy { 0.0f };
+        float                      _c { 0.99f };
         bool                       _isPaused { true };
     };
 } // namespace VCX::Labs::RigidBody
