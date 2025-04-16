@@ -8,27 +8,29 @@
 #include <utility>
 #include <vector>
 
-
 namespace VCX::Labs::Fluid {
     struct Simulator {
-        std::vector<glm::vec3> m_particlePos; // Particle m_particlePos
-        std::vector<glm::vec3> m_particleVel; // Particle Velocity
-        std::vector<glm::vec3> m_particleColor;
+        std::vector<glm::vec3> m_particlePos;   // Particle m_particlePos
+        std::vector<glm::vec3> m_particleVel;   // Particle Velocity
+        std::vector<glm::vec3> m_particleColor; // Particle Color
 
-        float m_fRatio;
-        int   m_iCellX;
-        int   m_iCellY;
-        int   m_iCellZ;
-        float m_h;
-        float m_fInvSpacing;
-        int   m_iNumCells;
+        float m_fRatio = 0.95;
+        int   m_iCellX;      // num of X grids
+        int   m_iCellY;      // num of Y grids
+        int   m_iCellZ;      // num of Z grids
+        float m_h;           // XYZ spacing
+        float m_fInvSpacing; // float resolution
+        int   m_iNumCells;   // total num of Cells
 
-        int   m_iNumSpheres;
-        float m_particleRadius;
+        int   m_iNumSpheres;    // num of Spheres
+        float m_particleRadius; // particle radius
 
-        std::vector<glm::vec3> m_vel;
-        std::vector<glm::vec3> m_pre_vel;
-        std::vector<float>     m_near_num[3];
+        float xmin { -0.5 }, ymin { -0.5 }, zmin { -0.5 };
+        float xmax { 0.5 }, ymax { 0.5 }, zmax { 0.5 };
+
+        std::vector<glm::vec3> m_vel;         // grids velocity array
+        std::vector<glm::vec3> m_pre_vel;     //
+        std::vector<float>     m_near_num[3]; //
 
         std::vector<int> m_hashtable;
         std::vector<int> m_hashtableindex;
@@ -40,28 +42,38 @@ namespace VCX::Labs::Fluid {
                                               // m_type = FLUID_CELL if has particle and m_s == 1;
                                               // m_type = EMPTY_CELL if has No particle and m_s == 1;
         std::vector<float> m_particleDensity; // Particle Density per cell, saved in the grid cell
-        float              m_particleRestDensity;
+        float              m_particleRestDensity = 5.0f;
+        float              ko                    = 1.0f;
+        float              dt                    = 0.022f;
+        bool               compensateDrift       = true;
 
-        glm::vec3 gravity { 0, -9.81f, 0 };
+        glm::vec3 gravity { 0, 0, -9.81f };
 
-        void integrateParticles(float timeStep);
-        void pushParticlesApart(int numIters);
-        void handleParticleCollisions(glm::vec3 obstaclePos, float obstacleRadius, glm::vec3 obstacleVel);
-        void updateParticleDensity();
-
+        void        integrateParticles(float timeStep);
+        void        buildHashTable();
+        void        pushParticlesApart(int numIters);
+        void        handleParticleCollisions(glm::vec3 obstaclePos, float obstacleRadius, glm::vec3 obstacleVel);
+        void        updateParticleDensity();
         void        transferVelocities(bool toGrid, float flipRatio);
         void        solveIncompressibility(int numIters, float dt, float overRelaxation, bool compensateDrift);
         void        updateParticleColors();
         inline bool isValidVelocity(int i, int j, int k, int dir);
-        inline int  index2GridOffset(glm::ivec3 index);
+        inline int  Flattening(int i, int j, int k) { // 扁平化
+            return i * m_iCellY * m_iCellZ + j * m_iCellZ + k;
+        }
+        inline glm::ivec3 posToGridIndex(const glm::vec3 & pos) {
+            return glm::ivec3(
+                static_cast<int>((pos.x - xmin) / m_h),
+                static_cast<int>((pos.y - ymin) / m_h),
+                static_cast<int>((pos.z - zmin) / m_h));
+        }
 
         void SimulateTimestep(float const dt) {
-            int   numSubSteps       = 1;
-            int   numParticleIters  = 5;
-            int   numPressureIters  = 30;
+            int   numSubSteps       = 2;
+            int   numParticleIters  = 10;
+            int   numPressureIters  = 30; // numIters of Gauss-Seidel
             bool  separateParticles = true;
-            float overRelaxation    = 0.5;
-            bool  compensateDrift   = true;
+            float overRelaxation    = 1.9;
 
             float     flipRatio = m_fRatio;
             glm::vec3 obstaclePos(0.0f); // obstacle can be moved with mouse, as a user interaction
@@ -72,8 +84,9 @@ namespace VCX::Labs::Fluid {
             for (int step = 0; step < numSubSteps; step++) {
                 integrateParticles(sdt);
                 handleParticleCollisions(obstaclePos, 0.0, obstacleVel);
-                if (separateParticles)
+                if (separateParticles) {
                     pushParticlesApart(numParticleIters);
+                }
                 handleParticleCollisions(obstaclePos, 0.0, obstacleVel);
                 transferVelocities(true, flipRatio);
                 updateParticleDensity();
@@ -85,7 +98,7 @@ namespace VCX::Labs::Fluid {
 
         void setupScene(int res) {
             glm::vec3 tank(1.0f);
-            glm::vec3 relWater = { 0.6f, 0.8f, 0.6f };
+            glm::vec3 relWater = { 0.6f, 0.6f, 0.9f };
 
             float _h      = tank.y / res;
             float point_r = 0.3 * _h;
@@ -138,9 +151,6 @@ namespace VCX::Labs::Fluid {
             m_particleDensity.clear();
             m_particleDensity.resize(m_iNumCells, 0.0f);
 
-            // the rest density can be assigned after scene initialization
-            m_particleRestDensity = 0.0;
-
             // create particles
             int p = 0;
             for (int i = 0; i < numX; i++) {
@@ -157,7 +167,7 @@ namespace VCX::Labs::Fluid {
             for (int i = 0; i < m_iCellX; i++) {
                 for (int j = 0; j < m_iCellY; j++) {
                     for (int k = 0; k < m_iCellZ; k++) {
-                        float s = 1.0; // fluid
+                        float s = 1.0f; // fluid
                         if (i == 0 || i >= m_iCellX - 2 || j == 0 || j >= m_iCellY - 2 || k == 0 || k >= m_iCellZ - 2)
                             s = 0.0f; // solid
                         m_s[i * n + j * m + k] = s;

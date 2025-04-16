@@ -1,10 +1,10 @@
-#include "Labs/0-GettingStarted/CaseFluid.h"
+#include "Labs/2-FluidSimulation/CaseFluid.h"
 #include "Engine/app.h"
 #include "Labs/Common/ImGuiHelper.h"
 #include <iostream>
 #include <spdlog/spdlog.h>
 
-namespace VCX::Labs::GettingStarted {
+namespace VCX::Labs::Fluid {
     const std::vector<glm::vec3> vertex_pos = {
         glm::vec3(-0.5f, -0.5f, -0.5f),
         glm::vec3(0.5f, -0.5f, -0.5f),
@@ -33,7 +33,7 @@ namespace VCX::Labs::GettingStarted {
         _lineprogram.GetUniforms().SetByName("u_Color", glm::vec3(1.0f));
         _BoundaryItem.UpdateElementBuffer(line_index);
         ResetSystem();
-        _sphere = Engine::Model { Engine::Sphere(6, _r), 0 };
+        _sphere = Engine::Model { Engine::Sphere(6, _simulation.m_particleRadius), 0 };
     }
 
     void CaseFluid::OnSetupPropsUI() {
@@ -43,18 +43,34 @@ namespace VCX::Labs::GettingStarted {
         if (ImGui::Button(_stopped ? "Start Simulation" : "Stop Simulation"))
             _stopped = ! _stopped;
         ImGui::Spacing();
-        ImGui::SliderFloat("Mass", &_simulation.Mass, .5f, 5.f);
-        ImGui::SliderFloat("Omega.", &_simulation.Omega, .1f, 1.f);
-        ImGui::SliderFloat("Damp.", &_simulation.Damping, .1f, 1.f);
+        // 新增补偿漂移开关按钮
+        ImGui::Checkbox("Compensate Drift", &_simulation.compensateDrift); // 使用 Checkbox
+        ImGui::SameLine();
+        ImGui::TextDisabled("(?)");
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Enable/disable velocity drift compensation during FLIP-PIC blending.");
+        ImGui::SliderFloat("Rest Density", &_simulation.m_particleRestDensity, 0.0f, 10.0f, "%.2f");
+        ImGui::SliderFloat("Compensate Drift k", &_simulation.ko, 0.0f, 2.0f, "%.2f");
+        ImGui::Spacing();
+        ImGui::SliderFloat("FLIP Ratio", &_simulation.m_fRatio, 0.0f, 1.0f, "%.2f");
+        ImGui::SliderFloat("Time Step", &_simulation.dt, 0.001f, 0.05f, "%.3f");
     }
 
     Common::CaseRenderResult CaseFluid::OnRender(std::pair<std::uint32_t, std::uint32_t> const desiredSize) {
+        static bool firstRender = true;
+        if (firstRender) {
+            firstRender            = false;
+            _sceneObject.Camera.Up = glm::vec3(0.0f, 0.0f, 1.0f); // 强制设置 Up
+            _cameraManager.Save(_sceneObject.Camera);
+        }
+
         if (_recompute) {
             _recompute = false;
             _sceneObject.ReplaceScene(GetScene(_sceneIdx));
             _cameraManager.Save(_sceneObject.Camera);
         }
-        if (! _stopped) _simulation.SimulateTimestep(Engine::GetDeltaTime());
+
+        if (! _stopped) _simulation.SimulateTimestep(_simulation.dt);
 
         _BoundaryItem.UpdateVertexBuffer("position", Engine::make_span_bytes<glm::vec3>(vertex_pos));
         _frame.Resize(desiredSize);
@@ -83,9 +99,9 @@ namespace VCX::Labs::GettingStarted {
         _BoundaryItem.Draw({ _lineprogram.Use() });
         glLineWidth(1.f);
 
-        Rendering::ModelObject m        = Rendering::ModelObject(_sphere, _simulation.Positions);
+        Rendering::ModelObject m        = Rendering::ModelObject(_sphere, _simulation.m_particlePos);
         auto const &           material = _sceneObject.Materials[0];
-        m.Mesh.Draw({ material.Albedo.Use(), material.MetaSpec.Use(), material.Height.Use(), _program.Use() }, _sphere.Mesh.Indices.size(), 0, numofSpheres);
+        m.Mesh.Draw({ material.Albedo.Use(), material.MetaSpec.Use(), material.Height.Use(), _program.Use() }, _sphere.Mesh.Indices.size(), 0, _simulation.m_iNumSpheres);
 
         glDepthFunc(GL_LEQUAL);
         glDepthFunc(GL_LESS);
@@ -104,28 +120,12 @@ namespace VCX::Labs::GettingStarted {
     }
 
     void CaseFluid::ResetSystem() {
-        glm::vec3 tank(1.0f);
-        glm::vec3 relWater = { 0.6f, 0.8f, 0.6f };
-        float     _h       = tank.y / _res;
-        _r                 = 0.3 * _h; // cell size
-        float dx           = 2.0 * _r;
-        float dy           = sqrt(3.0) / 2.0 * dx;
-        float dz           = dx;
+        _simulation.setupScene(_res);
 
-        int numX     = floor((relWater.x * tank.x - 2.0 * _h - 2.0 * _r) / dx);
-        int numY     = floor((relWater.y * tank.y - 2.0 * _h - 2.0 * _r) / dy);
-        int numZ     = floor((relWater.z * tank.z - 2.0 * _h - 2.0 * _r) / dz);
-        numofSpheres = numX * numY * numZ;
-
-        _simulation.Positions.clear();
-        _simulation.Velocities.clear();
-
-        for (int i = 0; i < numX; i++)
-            for (int j = 0; j < numY; j++)
-                for (int k = 0; k < numZ; k++) {
-                    _simulation.Positions.push_back(glm::vec3(_h + _r + dx * i + (j % 2 == 0 ? 0.0 : _r) + 0.1f, _h + _r + dy * j, _h + _r + dz * k + (j % 2 == 0 ? 0.0 : _r)) + glm::vec3(-0.5f));
-                    _simulation.InitPositions.push_back(glm::vec3(_h + _r + dx * i + (j % 2 == 0 ? 0.0 : _r), _h + _r + dy * j, _h + _r + dz * k + (j % 2 == 0 ? 0.0 : _r)) + glm::vec3(-0.5f));
-                    _simulation.Velocities.push_back(glm::vec3(0.0f));
-                }
+        _sceneObject.Camera.Eye    = glm::vec3(0.0f, -2.0f, 1.0f); // 相机位置（可根据需要调整）
+        _sceneObject.Camera.Target = glm::vec3(0.0f, 0.0f, 0.0f);  // 焦点（看向原点）
+        _sceneObject.Camera.Up     = glm::vec3(0.0f, 0.0f, 1.0f);  // up 向量设为 Z 轴
+        _sceneObject.Camera.Fovy   = 45.0f;                        // 视野角度
+        _cameraManager.Save(_sceneObject.Camera);                  // 保存相机状态
     }
-} // namespace VCX::Labs::GettingStarted
+} // namespace VCX::Labs::Fluid

@@ -4,14 +4,14 @@
 #include "Engine/GL/Program.h"
 #include "Engine/GL/UniformBlock.hpp"
 #include "Engine/Sphere.h"
-#include "Labs/0-GettingStarted/FluidSimulator.h"
+#include "Labs/2-FluidSimulation/FluidSimulator.h"
 #include "Labs/Common/ICase.h"
 #include "Labs/Common/ImageRGB.h"
 #include "Labs/Common/OrbitCameraManager.h"
 #include "Labs/Scene/Content.h"
 #include "Labs/Scene/SceneObject.h"
 
-namespace VCX::Labs::GettingStarted {
+namespace VCX::Labs::Fluid {
 
     class CaseFluid : public Common::ICase {
     public:
@@ -46,7 +46,7 @@ namespace VCX::Labs::GettingStarted {
         float                               _BndWidth { 2.0 };
         bool                                _stopped { false };
         Engine::Model                       _sphere;
-        int                                 _res { 16 };
+        int                                 _res { 24 };
         float                               _r;
         int                                 numofSpheres;
         Fluid::Simulator                    _simulation;
@@ -55,4 +55,4 @@ namespace VCX::Labs::GettingStarted {
         Engine::Scene const & GetScene(std::size_t const i) const { return VCX::Labs::Rendering::Content::Scenes[std::size_t(_scenes[i])]; }
         void                  ResetSystem();
     };
-} // namespace VCX::Labs::GettingStarted
+} // namespace VCX::Labs::Fluid
