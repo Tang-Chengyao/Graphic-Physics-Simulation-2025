@@ -83,43 +83,38 @@ void Simulator::pushParticlesApart(int numIters) {
 }
 
 void Simulator::handleParticleCollisions(glm::vec3 obstaclePos, float obstacleRadius, glm::vec3 obstacleVel) {
-    buildHashTable();
-    for (int i = 0; i < m_iCellX; i++) {
-        for (int j = 0; j < m_iCellY; j++) {
-            for (int k = 0; k < m_iCellZ; k++) {
-                if (i <= 1 || i >= m_iCellX - 2 || j <= 1 || j >= m_iCellY - 2 || k <= 1 || k >= m_iCellZ - 2) { // 边界处
-                    int cellIdx = i * m_iCellY * m_iCellZ + j * m_iCellZ + k;
-                    int start   = m_hashtableindex[cellIdx];
-                    int end     = m_hashtableindex[cellIdx + 1];
-                    for (int idx = start; idx < end; ++idx) {
-                        int p = m_hashtable[idx];
-                        if (m_particlePos[p].x < xmin + m_h + m_particleRadius) {
-                            m_particlePos[p].x = xmin + m_h + m_particleRadius;
-                            m_particleVel[p].x = 0.0f;
-                        }
-                        if (m_particlePos[p].y < ymin + m_h + m_particleRadius) {
-                            m_particlePos[p].y = ymin + m_h + m_particleRadius;
-                            m_particleVel[p].y = 0.0f;
-                        }
-                        if (m_particlePos[p].z < zmin + m_h + m_particleRadius) {
-                            m_particlePos[p].z = zmin + m_h + m_particleRadius;
-                            m_particleVel[p].z = 0.0f;
-                        }
-                        if (m_particlePos[p].x > xmax - m_h - m_particleRadius) {
-                            m_particlePos[p].x = xmax - m_h - m_particleRadius;
-                            m_particleVel[p].x = 0.0f;
-                        }
-                        if (m_particlePos[p].y > ymax - m_h - m_particleRadius) {
-                            m_particlePos[p].y = ymax - m_h - m_particleRadius;
-                            m_particleVel[p].y = 0.0f;
-                        }
-                        if (m_particlePos[p].z > zmax - m_h - m_particleRadius) {
-                            m_particlePos[p].z = zmax - m_h - m_particleRadius;
-                            m_particleVel[p].z = 0.0f;
-                        }
-                    }
-                }
-            }
+    for (int p = 0; p < m_iNumSpheres; p++) {
+        if (m_particlePos[p].x < xmin + m_h + m_particleRadius) {
+            m_particlePos[p].x = xmin + m_h + m_particleRadius;
+            m_particleVel[p].x = 0.0f;
+        }
+        if (m_particlePos[p].y < ymin + m_h + m_particleRadius) {
+            m_particlePos[p].y = ymin + m_h + m_particleRadius;
+            m_particleVel[p].y = 0.0f;
+        }
+        if (m_particlePos[p].z < zmin + m_h + m_particleRadius) {
+            m_particlePos[p].z = zmin + m_h + m_particleRadius;
+            m_particleVel[p].z = 0.0f;
+        }
+        if (m_particlePos[p].x > xmax - m_h - m_particleRadius) {
+            m_particlePos[p].x = xmax - m_h - m_particleRadius;
+            m_particleVel[p].x = 0.0f;
+        }
+        if (m_particlePos[p].y > ymax - m_h - m_particleRadius) {
+            m_particlePos[p].y = ymax - m_h - m_particleRadius;
+            m_particleVel[p].y = 0.0f;
+        }
+        if (m_particlePos[p].z > zmax - m_h - m_particleRadius) {
+            m_particlePos[p].z = zmax - m_h - m_particleRadius;
+            m_particleVel[p].z = 0.0f;
+        }
+        // 障碍物处理
+        glm::vec3 d        = m_particlePos[p] - obstaclePos;
+        float     length_d = glm::length(d);
+        glm::vec3 n        = d / length_d;
+        if (length_d < obstacleRadius + m_particleRadius) {
+            glm::vec3 s = (obstacleRadius + m_particleRadius - length_d) * n;
+            m_particlePos[p] += s;
         }
     }
 }

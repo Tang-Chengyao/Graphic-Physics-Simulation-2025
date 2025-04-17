@@ -14,7 +14,7 @@ namespace VCX::Labs::Fluid {
         std::vector<glm::vec3> m_particleVel;   // Particle Velocity
         std::vector<glm::vec3> m_particleColor; // Particle Color
 
-        float m_fRatio = 0.95;
+        float m_fRatio = 0.99;
         int   m_iCellX;      // num of X grids
         int   m_iCellY;      // num of Y grids
         int   m_iCellZ;      // num of Z grids
@@ -42,10 +42,12 @@ namespace VCX::Labs::Fluid {
                                               // m_type = FLUID_CELL if has particle and m_s == 1;
                                               // m_type = EMPTY_CELL if has No particle and m_s == 1;
         std::vector<float> m_particleDensity; // Particle Density per cell, saved in the grid cell
-        float              m_particleRestDensity = 5.0f;
+        float              m_particleRestDensity = 4.7f;
         float              ko                    = 1.0f;
         float              dt                    = 0.022f;
         bool               compensateDrift       = true;
+        glm::vec3          obstaclePos;
+        glm::vec3          obstacleVel;
 
         glm::vec3 gravity { 0, 0, -9.81f };
 
@@ -70,24 +72,21 @@ namespace VCX::Labs::Fluid {
 
         void SimulateTimestep(float const dt) {
             int   numSubSteps       = 2;
-            int   numParticleIters  = 10;
+            int   numParticleIters  = 15;
             int   numPressureIters  = 30; // numIters of Gauss-Seidel
             bool  separateParticles = true;
             float overRelaxation    = 1.9;
 
-            float     flipRatio = m_fRatio;
-            glm::vec3 obstaclePos(0.0f); // obstacle can be moved with mouse, as a user interaction
-            glm::vec3 obstacleVel(0.0f);
-
-            float sdt = dt / numSubSteps;
+            float flipRatio = m_fRatio;
+            float sdt       = dt / numSubSteps;
 
             for (int step = 0; step < numSubSteps; step++) {
                 integrateParticles(sdt);
-                handleParticleCollisions(obstaclePos, 0.0, obstacleVel);
+                handleParticleCollisions(obstaclePos, 0.2, obstacleVel);
                 if (separateParticles) {
                     pushParticlesApart(numParticleIters);
                 }
-                handleParticleCollisions(obstaclePos, 0.0, obstacleVel);
+                handleParticleCollisions(obstaclePos, 0.2, obstacleVel);
                 transferVelocities(true, flipRatio);
                 updateParticleDensity();
                 solveIncompressibility(numPressureIters, sdt, overRelaxation, compensateDrift);
@@ -119,6 +118,8 @@ namespace VCX::Labs::Fluid {
             m_fInvSpacing    = float(res);
             m_iNumCells      = m_iCellX * m_iCellY * m_iCellZ;
             m_particleRadius = point_r; // modified
+            obstaclePos      = glm::vec3(0.0f);
+            obstacleVel      = glm::vec3(0.0f);
 
             // update particle array
             m_particlePos.clear();
