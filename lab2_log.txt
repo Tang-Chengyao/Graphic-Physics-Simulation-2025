@@ -1,0 +1,241 @@
+commit 41bf70bef853ad79427e63efb5848ada62ae5675
+Author: 唐成曜 <2419457053@qq.com>
+Date:   Thu Apr 17 20:15:37 2025 +0800
+
+    Fluid Simulation 2, 添加了障碍物
+
+ lab2_report.md                                    | 21 +++++++
+ src/VCX/Labs/2-FluidSimulation/CaseFluid.cpp      | 61 ++++++++++++++++++++
+ src/VCX/Labs/2-FluidSimulation/CaseFluid.h        |  1 +
+ src/VCX/Labs/2-FluidSimulation/FluidSimulator.cpp | 69 +++++++++++------------
+ src/VCX/Labs/2-FluidSimulation/FluidSimulator.h   | 21 +++----
+ 5 files changed, 126 insertions(+), 47 deletions(-)
+
+commit f1ac144a53485812dbe6041ebcebf9043cdce114
+Author: 唐成曜 <2419457053@qq.com>
+Date:   Wed Apr 16 10:37:20 2025 +0800
+
+    Fluid Simulation 1st submission.
+
+ README.md                                         | 124 ++++----
+ src/VCX/Labs/0-GettingStarted/CaseFluid.cpp       | 111 +++----
+ src/VCX/Labs/0-GettingStarted/CaseFluid.h         |   1 -
+ src/VCX/Labs/0-GettingStarted/FluidSimulator.h    |  21 +-
+ src/VCX/Labs/2-FluidSimulation/App.cpp            |  14 +
+ src/VCX/Labs/2-FluidSimulation/App.h              |  25 ++
+ src/VCX/Labs/2-FluidSimulation/CaseFluid.cpp      | 131 ++++++++
+ src/VCX/Labs/2-FluidSimulation/CaseFluid.h        |  58 ++++
+ src/VCX/Labs/2-FluidSimulation/FluidSimulator.cpp | 362 ++++++++++++++++++++++
+ src/VCX/Labs/2-FluidSimulation/FluidSimulator.h   |  84 ++---
+ src/VCX/Labs/2-FluidSimulation/main.cpp           |  10 +
+ 11 files changed, 779 insertions(+), 162 deletions(-)
+
+commit a357b3e195465120aa3d71ff4d3b8297ef3eb8a4
+Author: 唐成曜 <2419457053@qq.com>
+Date:   Tue Apr 1 17:45:38 2025 +0800
+
+    修改了Box-Wall碰撞代码的bug。增加了动能-颜色映射。Box-Wall之间用的是参数c处理，没有摩擦。Box-Box之间依然用库仑定律计算，有切向摩擦。切向摩擦过小时boxes会都飞起来。
+
+ src/VCX/Labs/1-RigidBody/Box.h               |  14 +-
+ src/VCX/Labs/1-RigidBody/CaseMultipleBox.cpp | 249 ++++++++++++++-------------
+ src/VCX/Labs/1-RigidBody/CaseMultipleBox.h   |  20 +--
+ 3 files changed, 150 insertions(+), 133 deletions(-)
+
+commit 3c6bc93d1cb4406db509d4c6333193f00889e1ec
+Author: 唐成曜 <2419457053@qq.com>
+Date:   Tue Apr 1 14:18:46 2025 +0800
+
+    写了多个刚体的代码，加了墙，刚体没法稳定在地面。想想之前的代码是可以稳定的，可能是因为之前碰撞的检测和更新是分开的。先检测碰撞，把碰撞应该更新的速度增量暂存，最后和常规物理更新的增量统一附加在速度上。吃饭去了，回来改改。
+
+ src/VCX/Labs/1-RigidBody/App.h               |   9 +-
+ src/VCX/Labs/1-RigidBody/Box.h               |  15 +-
+ src/VCX/Labs/1-RigidBody/CaseMultipleBox.cpp | 292 +++++++++++++++++++++++++++
+ src/VCX/Labs/1-RigidBody/CaseMultipleBox.h   |  49 +++++
+ src/VCX/Labs/1-RigidBody/CaseTwoBox.cpp      |  13 --
+ src/VCX/Labs/1-RigidBody/Wall.h              |  46 +++++
+ 6 files changed, 406 insertions(+), 18 deletions(-)
+
+commit 053b480fcd08a5debe36da670e0a9c5c10bc2028
+Author: 唐成曜 <2419457053@qq.com>
+Date:   Mon Mar 31 16:57:39 2025 +0800
+
+    实现了2个box碰撞。用fcl检测碰撞点，取平均等效碰撞点，用库仑定律算碰撞点分离速度，反解冲量。
+
+ src/VCX/Labs/1-RigidBody/App.h          |   5 +-
+ src/VCX/Labs/1-RigidBody/Box.h          |  37 ++++++
+ src/VCX/Labs/1-RigidBody/CaseTwoBox.cpp | 211 ++++++++++++++++++++++++++++++++
+ src/VCX/Labs/1-RigidBody/CaseTwoBox.h   |  38 ++++++
+ 4 files changed, 290 insertions(+), 1 deletion(-)
+
+commit 7fe023de6dfd514eb2e6377a64819c8a95416077
+Author: 唐成曜 <2419457053@qq.com>
+Date:   Mon Mar 31 11:20:48 2025 +0800
+
+    单个box，键盘施加外力，修改了着色器
+
+ assets/shaders/flat.frag                   |   4 +-
+ assets/shaders/flat.vert                   |   2 +-
+ src/VCX/Labs/1-RigidBody/App.cpp           |  13 +++
+ src/VCX/Labs/1-RigidBody/App.h             |  25 +++++
+ src/VCX/Labs/1-RigidBody/CaseSingleBox.cpp | 170 +++++++++++++++++++++++++++++
+ src/VCX/Labs/1-RigidBody/CaseSingleBox.h   |  46 ++++++++
+ src/VCX/Labs/1-RigidBody/main.cpp          |  10 ++
+ 7 files changed, 267 insertions(+), 3 deletions(-)
+
+commit b750a1b0a7b5e1c56004958498ed9d624718b0ef
+Author: Frank660660 <ssiijjbb@163.com>
+Date:   Wed Feb 26 00:22:42 2025 +0800
+
+    fix bugs for mac
+
+ assets/shaders/envmap.frag    | 62 -------------------------------------------
+ assets/shaders/envmap.vert    | 35 ------------------------
+ assets/shaders/phong.vert     | 35 ------------------------
+ assets/shaders/skybox.frag    | 11 --------
+ assets/shaders/skybox.vert    | 31 ----------------------
+ assets/shaders/three.frag     | 33 -----------------------
+ assets/shaders/three.geom     | 50 ----------------------------------
+ assets/shaders/three.vert     | 30 ---------------------
+ src/VCX/Engine/GL/Texture.hpp |  4 ++-
+ src/VCX/Engine/SurfaceMesh.h  | 14 ++++++++++
+ src/VCX/Engine/app.cpp        |  4 ++-
+ xmake.lua                     |  4 +++
+ 12 files changed, 24 insertions(+), 289 deletions(-)
+
+commit f4cb7ec505e54bc85c65caf80e3f9e08cb0d8fd9
+Author: Frank660660 <ssiijjbb@163.com>
+Date:   Mon Feb 24 19:56:05 2025 +0800
+
+    specify imgui version <1.91,4
+
+ xmake.lua | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 4a3a8379c4969c56e5121144eec03f7e9041622b
+Author: Frank660660 <ssiijjbb@163.com>
+Date:   Mon Feb 24 12:25:38 2025 +0800
+
+    add_cxxflags for utf-8
+
+ src/VCX/Engine/app.h               | 1 +
+ src/VCX/Examples/Triangle/main.cpp | 2 +-
+ xmake.lua                          | 1 +
+ 3 files changed, 3 insertions(+), 1 deletion(-)
+
+commit 2ed6daf19ac7d2f24d9ade0551284fb8dcf56aad
+Author: Frank660660 <ssiijjbb@163.com>
+Date:   Mon Feb 24 01:14:38 2025 +0800
+
+    init
+
+ .clang-format                                    | 152 ++++
+ .gitignore                                       |  11 +
+ LICENSE                                          |  21 +
+ README.md                                        | 178 +++++
+ assets/fonts/Ubuntu.ttf                          | Bin 0 -> 279384 bytes
+ assets/fonts/UbuntuMono.ttf                      | Bin 0 -> 205748 bytes
+ assets/images/ground.jpg                         | Bin 0 -> 339354 bytes
+ assets/images/lab0-case1.png                     | Bin 0 -> 42293 bytes
+ assets/images/lab0-case2.png                     | Bin 0 -> 58986 bytes
+ assets/images/lab0-case3.png                     | Bin 0 -> 144187 bytes
+ assets/images/lab0-case4.png                     | Bin 0 -> 110155 bytes
+ assets/images/lab0-case5.png                     | Bin 0 -> 193874 bytes
+ assets/images/vcl-logo-16x16.png                 | Bin 0 -> 1985 bytes
+ assets/images/vcl-logo-256x256.png               | Bin 0 -> 4533 bytes
+ assets/images/vcl-logo-32x32.png                 | Bin 0 -> 2203 bytes
+ assets/images/vcl-logo-48x48.png                 | Bin 0 -> 2439 bytes
+ assets/scenes/fluid/fluid.yaml                   |  21 +
+ assets/shaders/envmap.frag                       |  62 ++
+ assets/shaders/envmap.vert                       |  35 +
+ assets/shaders/flat.frag                         |  11 +
+ assets/shaders/flat.vert                         |  14 +
+ assets/shaders/fluid.frag                        |  77 ++
+ assets/shaders/fluid.vert                        |  36 +
+ assets/shaders/phong.frag                        |  92 +++
+ assets/shaders/phong.vert                        |  35 +
+ assets/shaders/skybox.frag                       |  11 +
+ assets/shaders/skybox.vert                       |  31 +
+ assets/shaders/sphere_phong.vert                 |  36 +
+ assets/shaders/three.frag                        |  33 +
+ assets/shaders/three.geom                        |  50 ++
+ assets/shaders/three.vert                        |  30 +
+ assets/shaders/triangle.frag                     |   9 +
+ assets/shaders/triangle.vert                     |  11 +
+ lab0-GettingStarted.md                           | 107 +++
+ src/3rdparty/imgui_impl_glfw.cpp                 | 663 +++++++++++++++++
+ src/3rdparty/imgui_impl_glfw.h                   |  46 ++
+ src/3rdparty/imgui_impl_opengl3.cpp              | 871 +++++++++++++++++++++++
+ src/3rdparty/imgui_impl_opengl3.h                |  55 ++
+ src/3rdparty/imgui_impl_opengl3_loader.h         | 786 ++++++++++++++++++++
+ src/3rdparty/scope.hpp                           | 574 +++++++++++++++
+ src/3rdparty/stb_image.cpp                       |   4 +
+ src/3rdparty/tiny_obj_loader.cpp                 |   4 +
+ src/VCX/Assets/bundled.h                         |  29 +
+ src/VCX/Engine/Async.hpp                         |  67 ++
+ src/VCX/Engine/Camera.hpp                        |  31 +
+ src/VCX/Engine/Formats.hpp                       | 136 ++++
+ src/VCX/Engine/GL/Frame.hpp                      | 178 +++++
+ src/VCX/Engine/GL/Program.cpp                    |  37 +
+ src/VCX/Engine/GL/Program.h                      |  36 +
+ src/VCX/Engine/GL/RenderItem.cpp                 |  70 ++
+ src/VCX/Engine/GL/RenderItem.h                   |  68 ++
+ src/VCX/Engine/GL/Sampler.hpp                    |  59 ++
+ src/VCX/Engine/GL/Shader.cpp                     |  57 ++
+ src/VCX/Engine/GL/Shader.h                       |  29 +
+ src/VCX/Engine/GL/Texture.hpp                    | 185 +++++
+ src/VCX/Engine/GL/UniformBlock.hpp               |  32 +
+ src/VCX/Engine/GL/VertexLayout.hpp               | 104 +++
+ src/VCX/Engine/GL/resource.hpp                   | 190 +++++
+ src/VCX/Engine/GL/uniform.hpp                    | 137 ++++
+ src/VCX/Engine/Scene.cpp                         |  14 +
+ src/VCX/Engine/Scene.h                           |  82 +++
+ src/VCX/Engine/Sphere.cpp                        |  54 ++
+ src/VCX/Engine/Sphere.h                          |  26 +
+ src/VCX/Engine/SurfaceMesh.cpp                   |  83 +++
+ src/VCX/Engine/SurfaceMesh.h                     |  26 +
+ src/VCX/Engine/TextureND.hpp                     | 121 ++++
+ src/VCX/Engine/app.cpp                           | 210 ++++++
+ src/VCX/Engine/app.h                             |  68 ++
+ src/VCX/Engine/loader.cpp                        | 442 ++++++++++++
+ src/VCX/Engine/loader.h                          |  21 +
+ src/VCX/Engine/math.hpp                          |  30 +
+ src/VCX/Engine/prelude.hpp                       |  30 +
+ src/VCX/Engine/type.hpp                          |  41 ++
+ src/VCX/Examples/ImGui/main.cpp                  |  35 +
+ src/VCX/Examples/Triangle/main.cpp               |  72 ++
+ src/VCX/Labs/0-GettingStarted/App.cpp            |  14 +
+ src/VCX/Labs/0-GettingStarted/App.h              |  33 +
+ src/VCX/Labs/0-GettingStarted/CaseBox.cpp        | 103 +++
+ src/VCX/Labs/0-GettingStarted/CaseBox.h          |  35 +
+ src/VCX/Labs/0-GettingStarted/CaseFixed.cpp      |  85 +++
+ src/VCX/Labs/0-GettingStarted/CaseFixed.h        |  29 +
+ src/VCX/Labs/0-GettingStarted/CaseFluid.cpp      | 140 ++++
+ src/VCX/Labs/0-GettingStarted/CaseFluid.h        |  59 ++
+ src/VCX/Labs/0-GettingStarted/CaseMassSpring.cpp | 104 +++
+ src/VCX/Labs/0-GettingStarted/CaseMassSpring.h   |  40 ++
+ src/VCX/Labs/0-GettingStarted/CaseResizable.cpp  |  55 ++
+ src/VCX/Labs/0-GettingStarted/CaseResizable.h    |  28 +
+ src/VCX/Labs/0-GettingStarted/FluidSimulator.h   |  25 +
+ src/VCX/Labs/0-GettingStarted/MassSpringSystem.h | 110 +++
+ src/VCX/Labs/0-GettingStarted/main.cpp           |  13 +
+ src/VCX/Labs/1-RigidBody/main.cpp                |   5 +
+ src/VCX/Labs/2-FluidSimulation/FluidSimulator.h  | 169 +++++
+ src/VCX/Labs/2-FluidSimulation/main.cpp          |   5 +
+ src/VCX/Labs/3-FEM/main.cpp                      |   5 +
+ src/VCX/Labs/Common/FlyCameraManager.cpp         | 131 ++++
+ src/VCX/Labs/Common/FlyCameraManager.h           |  66 ++
+ src/VCX/Labs/Common/ICase.h                      |  29 +
+ src/VCX/Labs/Common/ImGuiHelper.cpp              |  76 ++
+ src/VCX/Labs/Common/ImGuiHelper.h                |  26 +
+ src/VCX/Labs/Common/ImageRGB.cpp                 |  42 ++
+ src/VCX/Labs/Common/ImageRGB.h                   |  13 +
+ src/VCX/Labs/Common/OrbitCameraManager.cpp       | 193 +++++
+ src/VCX/Labs/Common/OrbitCameraManager.h         |  74 ++
+ src/VCX/Labs/Common/UI.cpp                       | 326 +++++++++
+ src/VCX/Labs/Common/UI.h                         |  68 ++
+ src/VCX/Labs/Scene/Content.cpp                   |  76 ++
+ src/VCX/Labs/Scene/Content.h                     |  12 +
+ src/VCX/Labs/Scene/SceneObject.cpp               | 157 ++++
+ src/VCX/Labs/Scene/SceneObject.h                 |  77 ++
+ xmake.lua                                        | 135 ++++
+ 110 files changed, 9424 insertions(+)

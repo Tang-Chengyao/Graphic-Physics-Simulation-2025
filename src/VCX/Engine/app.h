@@ -17,7 +17,7 @@ namespace VCX::Engine {
 
     /**
      * @brief The interface of applications, used as the base class.
-     * 
+     *
      * \sa RunApp()
      */
     class IApp {
@@ -30,7 +30,7 @@ namespace VCX::Engine {
 
     /**
      * @brief Structure of options required to create context of the application.
-     * 
+     *
      * \note The data of \c std::string_view in fields of this struct will be passed directly to third-party libraries as C-style strings,
      * so they must be null-terminated, and the caller should handle encoding and path-related issues.
      */
@@ -53,7 +53,7 @@ namespace VCX::Engine {
     /**
      * @brief  Create a graphics (GLFW + GLAD + ImGui) context, construct an instance of TApp,
      *         runs a render-loop and calls IApp::OnFrame(), etc., on each frame.
-     * 
+     *
      * @tparam TApp    A derived class of IApp implementing IApp::OnFrame(), which should have a constructor without parameters.
      * @param  options The options used to create application context.
      * @return         0 indicating successful exiting.

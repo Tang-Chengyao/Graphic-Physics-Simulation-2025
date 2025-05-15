@@ -8,7 +8,6 @@
 #include "Labs/Common/ImageRGB.h"
 #include "Labs/Common/OrbitCameraManager.h"
 
-
 namespace VCX::Labs::GettingStarted {
     class CaseMassSpring : public Common::ICase {
     public:
@@ -28,9 +27,9 @@ namespace VCX::Labs::GettingStarted {
         Engine::GL::UniqueRenderItem        _particlesItem;
         Engine::GL::UniqueIndexedRenderItem _springsItem;
         float                               _particleSize { 2 };
-        float                               _springWidth { 1 };
+        float                               _springWidth { 3 };
         glm::vec3                           _particleColor { 1.f, 0.f, 0.f };
-        glm::vec3                           _springColor { 0.f, 0.f, 1.f };
+        glm::vec3                           _springColor { 1.f, 0.f, 0.f };
         bool                                _stopped { false };
 
         MassSpringSystem _massSpringSystem;

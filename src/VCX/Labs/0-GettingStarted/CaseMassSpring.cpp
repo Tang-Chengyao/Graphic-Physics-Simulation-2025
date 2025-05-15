@@ -1,12 +1,11 @@
-#include "Engine/app.h"
 #include "Labs/0-GettingStarted/CaseMassSpring.h"
+#include "Engine/app.h"
 #include "Labs/Common/ImGuiHelper.h"
 
 namespace VCX::Labs::GettingStarted {
     CaseMassSpring::CaseMassSpring():
         _program(
-            Engine::GL::UniqueProgram({ Engine::GL::SharedShader("assets/shaders/flat.vert"),
-                                        Engine::GL::SharedShader("assets/shaders/flat.frag") })),
+            Engine::GL::UniqueProgram({ Engine::GL::SharedShader("assets/shaders/flat.vert"), Engine::GL::SharedShader("assets/shaders/flat.frag") })),
         _particlesItem(Engine::GL::VertexLayout().Add<glm::vec3>("position", Engine::GL::DrawFrequency::Stream, 0), Engine::GL::PrimitiveType::Points),
         _springsItem(Engine::GL::VertexLayout().Add<glm::vec3>("position", Engine::GL::DrawFrequency::Stream, 0), Engine::GL::PrimitiveType::Lines) {
         _cameraManager.AutoRotate = false;
